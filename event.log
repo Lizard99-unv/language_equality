@@ -1,0 +1,14 @@
+INFO:root:Add Node
+INFO:root:{0: (None, None), 'graph': (None, None)}
+INFO:root:graph
+INFO:root:{0: (None, None), 'graph': (278, 565)}
+INFO:root:Add Node
+INFO:root:{0: (None, None), 'graph': (278, 565)}
+INFO:root:graph
+INFO:root:{0: (None, None), 'graph': (484, 582)}
+INFO:root:graph
+INFO:root:{0: (None, None), 'graph': (115, 378)}
+INFO:root:Add Edge
+INFO:root:{0: (None, None), 'graph': (115, 378)}
+INFO:root:graph
+INFO:root:{0: (None, None), 'graph': (260, 561)}
