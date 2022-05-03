@@ -76,7 +76,7 @@ class Window:
         if self._to_group and self._active is not None and self._active != 0 and self._group_index != 1:
             if self._group_index == 0 or self._active == 1:
                 self._figures.append(Arrow(self._graph, self._figures[self._group_index], self._figures[self._active], ""))
-                self._matr.append([getattr(self._figures[self._group_index], 'text', ""), getattr(self._figures[self._active], 'text', ""), ""])
+                self._matr.append([getattr(self._figures[self._group_index], '_text', ""), getattr(self._figures[self._active], '_text', ""), ""])
             elif str(type(self._figures[self._active])) != "<class 'src.arrow.Arrow'>":
                 text = sg.popup_get_text('Enter label and bracket')
                 if text is not None:
