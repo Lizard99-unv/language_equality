@@ -34,7 +34,7 @@ def get_paths(graph, start, end, path, visits):
     if start == end:
         if start in visits.keys():
             visits[start] += 1
-            if visits[start] > 1:
+            if visits[start] > 3:
                 path.append(start)
                 return [path]
         else:
@@ -50,7 +50,7 @@ def get_paths(graph, start, end, path, visits):
             return paths
     if start in visits.keys():
         visits[start] += 1
-        if visits[start] > 2:
+        if visits[start] > 3:
             path.append(start)
             return []
     else:
@@ -61,6 +61,33 @@ def get_paths(graph, start, end, path, visits):
     for neighbor in neighbors:
         paths += get_paths(graph, neighbor, end, copy.copy(path), copy.copy(visits))
     return paths
+
+def take_kernel(start, end, path, labels, i, k, kernels):
+    if i == len(path) - 1:
+        return k
+    for s in start:
+        for e in end:
+            for q in range(int(e) + 1):
+                if (path[i], path[i+1], q) in labels:
+                    if len(k) <= i:
+                        k.append(labels[(path[i], path[i+1], q)])
+                        kernels.append(take_kernel(start, end, path, labels, i+1,copy.copy(k), []))
+                    else:
+                        k.pop(len(k)-1)
+                        k.append(labels[(path[i], path[i+1], q)])
+                        kernels.append(take_kernel(start, end, path, labels, i+1,copy.copy(k), []))
+    return kernels
+
+def flatten(kernel):
+    ker = []
+    for elem in kernel:
+        if elem == []:
+            ker.append(elem)
+        elif str(type(elem[0])) == "<class 'str'>":
+            ker.append(elem)
+        else:
+            ker += flatten(elem)
+    return ker
 
 def find_kernels(matr1, start1, finish1):
     graph1 = draw_and_transform(matr1)
@@ -75,11 +102,9 @@ def find_kernels(matr1, start1, finish1):
     labels = nx.get_edge_attributes(nx_graph, "label")
     kernels = []
     for path in paths:
-        kernel = []
-        for i in range(len(path)-1):
-            kernel.append(labels[(path[i], path[i+1], 0)])
-        kernels.append(kernel)
-    return list(map(lambda x: list(map(lambda y: re.sub(r'\"',"",y), x)), kernels))
+        kernels.append(take_kernel(start1, finish1, path, labels, 0, [], []))
+    ker = flatten(kernels)
+    return list(map(lambda x: list(map(lambda y: re.sub(r'\"',"",y), x)), ker))
 
 def check_correct_path(kernel):
     for path in kernel:
@@ -127,18 +152,30 @@ def find_correct_path(res):
             correct_paths.append(kernel)
     return correct_paths
 
+def final_check(path):
+    word = []
+    for elem in path:
+        if len(elem) == 3:
+            word.append(elem[2])
+    if check_correct_path([word]):
+        return True
+    return False
 
 def check_path_in_graph(matr, start, end, path, kernels):
-    path.append(start)
     if kernels == []:
         if start == end:
-            return True
+            if final_check(path):
+                return True
+            else:
+                return False
         else:
             return False
     res = []
     for elem in matr:
         if elem[2].find(kernels[0].split()[0]) >= 0 and start == elem[0]:
-            res.append(check_path_in_graph(matr, elem[1], end, copy.copy(path), kernels[1:]))
+            path2 = copy.copy(path)
+            path2.append(elem)
+            res.append(check_path_in_graph(matr, elem[1], end, path2, kernels[1:]))
     if True in res:
         return True
     return False
@@ -170,7 +207,7 @@ def check_all_paths_in_graph(matr, start, end, kernels):
 
 def check_eq(res1, res2):
     matr1, start1, finish1 = remove_end(res1)
-    kernel1 = find_correct_path(res1) 
+    kernel1 = find_correct_path(res1)
     matr2, start2, finish2 = remove_end(res2)
     kernel2 = find_correct_path(res2) 
     if not check_all_paths_in_graph(matr1, start1, finish1, kernel2):
